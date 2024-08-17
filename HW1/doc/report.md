@@ -1,4 +1,4 @@
-# HW3 Polynomial
+# HW3 Polynomial Linked Lists
 
 ## 1.解題說明
 
