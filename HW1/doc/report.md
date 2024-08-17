@@ -156,25 +156,29 @@ Polynomial operator*(const Polynomial& b) const {
 
 ## 3.效能分析
 
-### 空間複雜度
+### 時間複雜度
 
-terms: O( $n$ )
+輸入 (operator>>): O( $n$ )
 
-Add: O( $n1+n2$ ) 其中 n1 和 n2 分別是兩個多項式的非零項數量。
+輸出 (operator<<): O( $n$ )
 
-Mult: O( $n1 \times n2$ )
+加法 (operator+) 和 減法 (operator-): O( $n1+n2$ )
 
-Eval: O( $1$ )
-
-### 空間複雜度
-
-terms: O( $1$ )
-
-Add: O( $n1+n2$ )
-
-Mult: O( $n1 \times n2$ )
+乘法 (operator*): O( $n1 \times n2$ )
 
 Eval: O( $n$ )
+
+### 空間複雜度
+
+輸入 (operator>>): O( $n$ )
+
+輸出 (operator<<): O( $1$ )
+
+加法 (operator+) 和 減法 (operator-): O( $n1+n2$ )
+
+乘法 (operator*): O( $n1 \times n2$ )
+
+Eval: O( $1$ )
 ## 4.測試
 
 ```
