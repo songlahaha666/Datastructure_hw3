@@ -133,29 +133,8 @@ New Biconnected Component:
 ...
 ```
 
-## 5. 使用說明（快速上手）
-
-編譯：
-```bash
-g++ -g GraphOperations.cpp -o GraphOperations.exe
-```
-
-執行：
-```bash
-./GraphOperations.exe
-```
-
-要把 `Graph` 拆成可重用的模組（供其他測試程式、產生器呼叫），建議把類別宣告/實作拆成 `Graph.h` / `Graph.cpp`，再寫一個 `tester.cpp` 或 `generator.cpp` 負責讀寫檔案與批次測試。
-
 ## 6. 心得與擴充建議
 
-- 本次實作讓我熟悉鄰接串列表示法，以及 DFS/BFS 在圖上的典型用途。
-- Connected Components 與 Biconnected（基於 Tarjan）是圖論中常見的分析工具，實務上常用於網路連通性、橋（bridge）與 articulation point（割點）等偵測。
-- 建議擴充：
-  - Biconnected 改為輸出節點集合（目前輸出邊對，可由邊集合轉換為節點集合）；
-  - 增加 `CountComponents()`、`CountBiconnected()` 等回傳數值函式，便於自動化測試；
-  - 將 `Graph` 拆成 `Graph.h` / `Graph.cpp`，並增加單元測試檔案與輸入/輸出規格。
-
----
-
-如果你要，我可以把本檔寫入其他檔名或幫你把 Biconnected 輸出改成節點集合，或進一步拆模組。
+本次實作讓我熟悉鄰接串列表示法，以及 DFS/BFS 在圖上的典型用途。
+並且更加了解Connected Components以及Biconnected Components之間的實作差異，透過先前的GraphAbstract又延伸出了各種Graph操作，
+把這些結合起來成就了一個基本的程式框架。
