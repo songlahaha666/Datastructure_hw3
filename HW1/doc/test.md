@@ -263,6 +263,7 @@ int main() {
 }
 ```
 
+### 輸出
 ```
 IsEmpty: 0
 NumberOfVertices: 10
