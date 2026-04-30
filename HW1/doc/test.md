@@ -21,6 +21,7 @@ virtual void InsertEdge(int u, int v)
 virtual void DeleteVertex(int v)
 virtual void DeleteEdge(int u, int v)
 ```
+
 ## 2.演算法設計與實作
 
 ### IsEmpty
@@ -189,17 +190,10 @@ void showArraylist() {
         }
     }
 ```
+
 ## 3.效能分析
 
 ### 時間複雜度
-
-輸入 (operator>>): O( $n$ )
-
-輸出 (operator<<): O( $n$ )
-
-加法 (operator+) 和 減法 (operator-): O( $n1+n2$ )
-
-乘法 (operator*): O( $n1 \times n2$ )
 
 IsEmpty：O(1)
 
@@ -223,34 +217,97 @@ showArraylist：O(n + e)
 
 showMartix：O(n²)
 
-Eval: O( $n$ )
-
 ### 空間複雜度
 
-輸入 (operator>>): O( $n$ )
+鄰接串列整體空間：O(n + e)
 
-輸出 (operator<<): O( $1$ )
+這種表示法比鄰接矩陣更省空間，特別適合邊數沒有很多的圖。
 
-加法 (operator+) 和 減法 (operator-): O( $n1+n2$ )
-
-乘法 (operator*): O( $n1 \times n2$ )
-
-Eval: O( $1$ )
 ## 4.測試
 
+### main()
+```cpp
+int main() {
+    Graph g(10);
+
+    g.InsertEdge(0, 1);
+    g.InsertEdge(1, 2);
+    g.InsertEdge(1, 3);
+    g.InsertEdge(2, 4);
+    g.InsertEdge(4, 3);
+    g.InsertEdge(3, 5);
+    g.InsertEdge(5, 6);
+    g.InsertEdge(5, 7);
+    g.InsertEdge(6, 7);
+    g.InsertEdge(7, 8);
+    g.InsertEdge(7, 9);
+
+    cout << "IsEmpty: " << g.IsEmpty() << endl;
+    cout << "NumberOfVertices: " << g.NumberOfVertices() << endl;
+    cout << "NumberOfEdges: " << g.NumberOfEdges() << endl;
+    cout << "Degree(7): " << g.Degree(7) << endl;
+    cout << "ExistsEdge(5, 7): " << g.ExistsEdge(5, 7) << endl;
+
+    g.showArraylist();
+    g.showMartix();
+
+    g.DeleteEdge(5, 7);
+    g.DeleteVertex(9);
+
+    cout << endl << "After DeleteEdge(5, 7) and DeleteVertex(9)" << endl;
+    cout << "NumberOfVertices: " << g.NumberOfVertices() << endl;
+    cout << "NumberOfEdges: " << g.NumberOfEdges() << endl;
+    g.showArraylist();
+
+    return 0;
+}
 ```
-請輸入多項式 p1: 3 5 3 4 2 3 0
-請輸入多項式 p2: 3 2 5 8 3 2 2
-p1 + p2 = 2x^5 + 13x^3 + 6x^2 + 3x^0
-p1 - p2 = -2x^5 + -3x^3 + 2x^2 + 3x^0
-p1 * p2 = 10x^8 + 8x^7 + 40x^6 + 48x^5 + 8x^4 + 24x^3 + 6x^2
-請輸入要計算的 x 值: 5
-p1(x) = 728
-p2(x) = 7300
+
+```
+IsEmpty: 0
+NumberOfVertices: 10
+NumberOfEdges: 11
+Degree(7): 4
+ExistsEdge(5, 7): 1
+0 : 1 
+1 : 0 2 3 
+2 : 1 4 
+3 : 1 4 5 
+4 : 2 3 
+5 : 3 6 7 
+6 : 5 7 
+7 : 5 6 8 9 
+8 : 7 
+9 : 7 
+0 1 2 3 4 5 6 7 8 9 
+0 1 0 0 0 0 0 0 0 0 
+1 0 1 1 0 0 0 0 0 0 
+0 1 0 0 1 0 0 0 0 0 
+0 1 0 0 1 1 0 0 0 0 
+0 0 1 1 0 0 0 0 0 0 
+0 0 0 1 0 0 1 1 0 0 
+0 0 0 0 0 1 0 1 0 0 
+0 0 0 0 0 1 1 0 1 1 
+0 0 0 0 0 0 0 1 0 0 
+0 0 0 0 0 0 0 1 0 0 
+
+After DeleteEdge(5, 7) and DeleteVertex(9)
+NumberOfVertices: 9
+NumberOfEdges: 9
+0 : 1 
+1 : 0 2 3 
+2 : 1 4 
+3 : 1 4 5 
+4 : 2 3 
+5 : 3 6 
+6 : 5 7 
+7 : 6 8 
+8 : 7
 ```
 
 ## 5.心得討論
 
-因為上次有用陣列方式實作過了多項式的各種算術操作，這次就是把程式碼本來用陣列的方式改成使用串列連結的方式，並且重載每個算術的符號，這次
-比較特別的是要新增一個減法功能，這是上次也沒有做過的。但有了前一次自我打好基礎後，我感覺在打code的時候健步如飛，比上次工作速度還要快上
-許多，真的非常有感。
+這次的圖形資料結構實作，讓我更熟悉鄰接串列的概念與無向圖的操作方式。
+和單純只做新增邊相比，刪除頂點的處理更複雜，因為除了要移除相關邊之外，還要重新整理頂點編號，這部分讓我更理解資料結構維護時的細節。
+透過這次練習，我也更清楚圖形結構中不同操作的成本差異。
+例如查詢度數很快，但刪除頂點與輸出矩陣則需要較多時間。
