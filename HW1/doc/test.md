@@ -1,117 +1,193 @@
-HW3 Graph Abstract
+# HW3 Polynomial Linked Lists
 
-1. 解題說明
+## 1.解題說明
+
 本程式主要是在實作一個圖形資料結構 Graph，並使用鄰接串列來儲存每個頂點之間的連結關係。
 程式提供了圖的基本操作，包含判斷圖是否為空、查詢頂點數與邊數、計算頂點度數、確認邊是否存在，以及新增和刪除頂點、邊等功能。
 另外也設計了兩種輸出方式，分別是鄰接串列與鄰接矩陣，方便觀察圖的結構是否正確。
 
 這份程式的重點在於理解圖的基本操作與資料維護方式，尤其是無向圖在刪除頂點或刪除邊時，鄰接資料要如何同步更新，這是整個程式中最重要的部分。
 
-2. 程式設計與實作
-Graph 類別
-本程式使用 Graph 類別來表示整張圖，主要成員如下：
+### 舉例說明
+```cpp 
+istream& operator>>(istream& is, Polynomial& x)
+ostream& operator<<(ostream& os, const Polynomial& x)
+Polynomial operator+(const Polynomial& b)
+Polynomial operator-(const Polynomial& b)
+Polynomial operator*(const Polynomial& b)
+float Evaluate(float x)
+```
+宣告各種重載函式與Evaluate函式實現相關功能
+## 2.演算法設計與實作
 
-n：代表頂點數量
-e：代表邊數量
-adj：鄰接串列陣列，每個 vector 用來存放某個頂點相連的所有鄰點
-私有輔助函式
-isValidVertex(int v)
-用來檢查頂點編號是否合法，避免操作到不存在的頂點。
+### operator' + '
 
-removeNeighbor(int u, int v)
-從頂點 u 的鄰接串列中刪除頂點 v，主要用在刪除邊的功能中。
+```cpp
+Polynomial operator+(const Polynomial& b) const {
+    Polynomial result;
+    Node* temp = result.head;
 
-公開函式
-IsEmpty()
-判斷圖是否為空，也就是頂點數是否為 0。
+    Node* pa = this->head->link;
+    Node* pb = b.head->link;
 
-NumberOfVertices()
-回傳圖目前的頂點數量。
+    while (pa != this->head && pb != b.head) {
+        Node* newNode = new Node();
+        if (pa->exp > pb->exp) {
+            newNode->coef = pa->coef;
+            newNode->exp = pa->exp;
+            pa = pa->link;
+        }
+        else if (pa->exp < pb->exp) {
+            newNode->coef = pb->coef;
+            newNode->exp = pb->exp;
+            pb = pb->link;
+        }
+        else {
+            newNode->coef = pa->coef + pb->coef;
+            newNode->exp = pa->exp;
+            pa = pa->link;
+            pb = pb->link;
+        }
+        temp->link = newNode;
+        temp = temp->link;
+    }
 
-NumberOfEdges()
-回傳圖目前的邊數量。
+    while (pa != this->head) {
+        Node* newNode = new Node();
+        newNode->coef = pa->coef;
+        newNode->exp = pa->exp;
+        temp->link = newNode;
+        temp = temp->link;
+        pa = pa->link;
+    }
 
-Degree(int u)
-回傳頂點 u 的度數，也就是與 u 相連的邊數。
+    while (pb != b.head) {
+        Node* newNode = new Node();
+        newNode->coef = pb->coef;
+        newNode->exp = pb->exp;
+        temp->link = newNode;
+        temp = temp->link;
+        pb = pb->link;
+    }
 
-ExistsEdge(int u, int v)
-檢查頂點 u 和頂點 v 之間是否存在邊。
+    temp->link = result.head;  // 將最後一個節點鏈結到頭節點
+    return result;
+}
+```
 
-InsertVertex(int v)
-新增一個頂點，並擴充鄰接串列陣列。
+### operator' - '
 
-InsertEdge(int u, int v)
-新增一條無向邊，會同時把 v 加入 u 的鄰接串列，也把 u 加入 v 的鄰接串列。
+```cpp
+Polynomial Polynomial::Mult(const Polynomial& poly) const {
+    Polynomial result;
+    result.capacity = terms * poly.terms;
+    result.termArray = new Term[result.capacity];
 
-DeleteVertex(int v)
-刪除某個頂點及其所有相關邊，並重新調整後面頂點的編號。
+    for (int i = 0; i < terms; ++i) {
+        for (int j = 0; j < poly.terms; ++j) {
+            float newCoef = termArray[i].coef * poly.termArray[j].coef;
+            int newExp = termArray[i].exp + poly.termArray[j].exp;
+            bool found = false;
 
-DeleteEdge(int u, int v)
-刪除 u 與 v 之間的邊，並同步更新兩端的鄰接串列與邊數。
+            for (int k = 0; k < result.terms; ++k) {
+                if (result.termArray[k].exp == newExp) {
+                    result.termArray[k].coef += newCoef;
+                    found = true;
+                    break;
+                }
+            }
 
-顯示函式
-showArraylist()
-用鄰接串列的方式輸出圖的內容，可以清楚看到每個頂點連到哪些點。
+            if (!found) {
+                result.termArray[result.terms].coef = newCoef;
+                result.termArray[result.terms].exp = newExp;
+                result.terms++;
+            }
+        }
+    }
 
-showMartix()
-用鄰接矩陣的方式輸出圖的內容，方便檢查整體連線狀況。
+    // 移除係數為0的項次
+    int validTerms = 0;
+    for (int i = 0; i < result.terms; ++i) {
+        if (result.termArray[i].coef != 0) {
+            result.termArray[validTerms++] = result.termArray[i];
+        }
+    }
+    result.terms = validTerms;
 
-3. 程式重點說明
-這份程式有幾個比較值得注意的地方：
+    return result;
+}
+```
 
-1. 使用鄰接串列表示無向圖
-每個頂點都用一個 vector 來存鄰點，所以在新增邊時，必須同時更新兩邊資料，這樣才能保持無向圖的對稱性。
+### operator' * '
 
-2. 刪除頂點時要重新編號
-因為頂點是用 0 到 n-1 來編號，所以刪掉某個頂點後，後面的頂點編號都要往前補 1。
-這也是 DeleteVertex() 比較複雜的原因。
+```cpp
+Polynomial operator*(const Polynomial& b) const {
+        Polynomial result;
+        Node* pa = this->head->link;
 
-3. 邊數 e 需要同步維護
-新增邊時 e 要加 1，刪除邊時 e 要減 1。
-刪除頂點後，因為相關邊也會一起消失，所以程式會重新計算邊數，避免資料錯誤。
+        while (pa != this->head) {
+            Polynomial tempPoly;
+            Node* temp = tempPoly.head;
+            Node* pb = b.head->link;
 
-4. 使用 ExistsEdge() 來檢查邊是否存在
-這樣可以避免重複插入同一條邊，也能在輸出矩陣時直接判斷每一對頂點是否相連。
+            while (pb != b.head) {
+                Node* newNode = new Node();
+                newNode->coef = pa->coef * pb->coef;  // 係數相乘
+                newNode->exp = pa->exp + pb->exp;    // 指數相加
+                temp->link = newNode;
+                temp = temp->link;
+                pb = pb->link;
+            }
 
-5. showMartix() 是用查詢方式產生矩陣
-不是直接存矩陣，而是透過 ExistsEdge() 一格一格判斷，因此可以和鄰接串列同步顯示圖形結構。
+            temp->link = tempPoly.head;  // 將最後一個節點鏈結到頭節點
+            result = result + tempPoly;
+            pa = pa->link;
+        }
 
-4. 效能分析
-時間複雜度
-IsEmpty：O(1)
-NumberOfVertices：O(1)
-NumberOfEdges：O(1)
-Degree：O(1)
-ExistsEdge：O(deg(u))
-InsertVertex：O(n)
-InsertEdge：O(1)
-DeleteEdge：O(deg(u) + deg(v))
-DeleteVertex：O(n + e)
-showArraylist：O(n + e)
-showMartix：O(n²)
-空間複雜度
-鄰接串列整體空間：O(n + e)
-這種表示法比鄰接矩陣更省空間，特別適合邊數沒有很多的圖。
+        return result;
+}
+```
 
-5. 測試結果
-在 main() 中，程式先建立一個有 10 個頂點的圖，並加入多條邊形成一個無向圖。
-接著測試下列功能：
+## 3.效能分析
 
-是否為空圖
-頂點數
-邊數
-某個頂點的度數
-某條邊是否存在
-鄰接串列輸出
-鄰接矩陣輸出
-刪除邊
-刪除頂點
-由測試結果可知，各項功能都能正常運作，顯示此圖形資料結構的實作是正確的。
+### 時間複雜度
 
-6. 心得討論
-這次的圖形資料結構實作，讓我更熟悉鄰接串列的概念與無向圖的操作方式。
-和單純只做新增邊相比，刪除頂點的處理更複雜，因為除了要移除相關邊之外，還要重新整理頂點編號，這部分讓我更理解資料結構維護時的細節。
+輸入 (operator>>): O( $n$ )
 
-透過這次練習，我也更清楚圖形結構中不同操作的成本差異。
-例如查詢度數很快，但刪除頂點與輸出矩陣則需要較多時間。
-整體來說，這份程式讓我對圖的基本操作、動態記憶體管理以及鄰接串列的實際應用都有更深入的理解。
+輸出 (operator<<): O( $n$ )
+
+加法 (operator+) 和 減法 (operator-): O( $n1+n2$ )
+
+乘法 (operator*): O( $n1 \times n2$ )
+
+Eval: O( $n$ )
+
+### 空間複雜度
+
+輸入 (operator>>): O( $n$ )
+
+輸出 (operator<<): O( $1$ )
+
+加法 (operator+) 和 減法 (operator-): O( $n1+n2$ )
+
+乘法 (operator*): O( $n1 \times n2$ )
+
+Eval: O( $1$ )
+## 4.測試
+
+```
+請輸入多項式 p1: 3 5 3 4 2 3 0
+請輸入多項式 p2: 3 2 5 8 3 2 2
+p1 + p2 = 2x^5 + 13x^3 + 6x^2 + 3x^0
+p1 - p2 = -2x^5 + -3x^3 + 2x^2 + 3x^0
+p1 * p2 = 10x^8 + 8x^7 + 40x^6 + 48x^5 + 8x^4 + 24x^3 + 6x^2
+請輸入要計算的 x 值: 5
+p1(x) = 728
+p2(x) = 7300
+```
+
+## 5.心得討論
+
+因為上次有用陣列方式實作過了多項式的各種算術操作，這次就是把程式碼本來用陣列的方式改成使用串列連結的方式，並且重載每個算術的符號，這次
+比較特別的是要新增一個減法功能，這是上次也沒有做過的。但有了前一次自我打好基礎後，我感覺在打code的時候健步如飛，比上次工作速度還要快上
+許多，真的非常有感。
