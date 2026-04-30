@@ -62,7 +62,7 @@ void ConnectedComponents() {
 }
 ```
 
-- Biconnected（邊為單位的雙連通分量） — Tarjan-like，使用 `dfn`/`low` 與邊堆疊
+- Biconnected（邊為單位的雙連通分量）
 核心遞迴函式 BiconnectedRec：
 ```cpp
 void BiconnectedRec(int u, int parent) {
