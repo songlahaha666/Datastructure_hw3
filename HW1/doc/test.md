@@ -201,6 +201,28 @@ void showArraylist() {
 
 乘法 (operator*): O( $n1 \times n2$ )
 
+IsEmpty：O(1)
+
+NumberOfVertices：O(1)
+
+NumberOfEdges：O(1)
+
+Degree：O(1)
+
+ExistsEdge：O(deg(u))
+
+InsertVertex：O(n)
+
+InsertEdge：O(1)
+
+DeleteEdge：O(deg(u) + deg(v))
+
+DeleteVertex：O(n + e)
+
+showArraylist：O(n + e)
+
+showMartix：O(n²)
+
 Eval: O( $n$ )
 
 ### 空間複雜度
