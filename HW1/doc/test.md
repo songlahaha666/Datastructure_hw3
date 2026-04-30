@@ -1,4 +1,4 @@
-# HW3 Polynomial Linked Lists
+# HW3 Graph Abstract
 
 ## 1.解題說明
 
@@ -8,14 +8,18 @@
 
 這份程式的重點在於理解圖的基本操作與資料維護方式，尤其是無向圖在刪除頂點或刪除邊時，鄰接資料要如何同步更新，這是整個程式中最重要的部分。
 
-### 舉例說明
+### 基本操作
 ```cpp 
-istream& operator>>(istream& is, Polynomial& x)
-ostream& operator<<(ostream& os, const Polynomial& x)
-Polynomial operator+(const Polynomial& b)
-Polynomial operator-(const Polynomial& b)
-Polynomial operator*(const Polynomial& b)
-float Evaluate(float x)
+virtual ~Graph()
+virtual bool IsEmpty()
+virtual int NumberOfVertices()
+virtual int NumberOfEdges()
+virtual int Degree(int u)
+virtual bool ExistsEdge(int u, int v)
+virtual void InsertVertex(int v)
+virtual void InsertEdge(int u, int v)
+virtual void DeleteVertex(int v)
+virtual void DeleteEdge(int u, int v)
 ```
 宣告各種重載函式與Evaluate函式實現相關功能
 ## 2.演算法設計與實作
