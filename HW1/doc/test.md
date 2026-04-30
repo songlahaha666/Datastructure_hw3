@@ -21,137 +21,174 @@ virtual void InsertEdge(int u, int v)
 virtual void DeleteVertex(int v)
 virtual void DeleteEdge(int u, int v)
 ```
-宣告各種重載函式與Evaluate函式實現相關功能
 ## 2.演算法設計與實作
 
-### operator' + '
+### IsEmpty
 
 ```cpp
-Polynomial operator+(const Polynomial& b) const {
-    Polynomial result;
-    Node* temp = result.head;
-
-    Node* pa = this->head->link;
-    Node* pb = b.head->link;
-
-    while (pa != this->head && pb != b.head) {
-        Node* newNode = new Node();
-        if (pa->exp > pb->exp) {
-            newNode->coef = pa->coef;
-            newNode->exp = pa->exp;
-            pa = pa->link;
-        }
-        else if (pa->exp < pb->exp) {
-            newNode->coef = pb->coef;
-            newNode->exp = pb->exp;
-            pb = pb->link;
-        }
-        else {
-            newNode->coef = pa->coef + pb->coef;
-            newNode->exp = pa->exp;
-            pa = pa->link;
-            pb = pb->link;
-        }
-        temp->link = newNode;
-        temp = temp->link;
+virtual bool IsEmpty() const {
+        return n == 0;
     }
-
-    while (pa != this->head) {
-        Node* newNode = new Node();
-        newNode->coef = pa->coef;
-        newNode->exp = pa->exp;
-        temp->link = newNode;
-        temp = temp->link;
-        pa = pa->link;
-    }
-
-    while (pb != b.head) {
-        Node* newNode = new Node();
-        newNode->coef = pb->coef;
-        newNode->exp = pb->exp;
-        temp->link = newNode;
-        temp = temp->link;
-        pb = pb->link;
-    }
-
-    temp->link = result.head;  // 將最後一個節點鏈結到頭節點
-    return result;
-}
 ```
 
-### operator' - '
+### NumberOfVertices
 
 ```cpp
-Polynomial Polynomial::Mult(const Polynomial& poly) const {
-    Polynomial result;
-    result.capacity = terms * poly.terms;
-    result.termArray = new Term[result.capacity];
+virtual int NumberOfVertices() const {
+        return n;
+    }  
+```
 
-    for (int i = 0; i < terms; ++i) {
-        for (int j = 0; j < poly.terms; ++j) {
-            float newCoef = termArray[i].coef * poly.termArray[j].coef;
-            int newExp = termArray[i].exp + poly.termArray[j].exp;
-            bool found = false;
+### NumberOfEdges
 
-            for (int k = 0; k < result.terms; ++k) {
-                if (result.termArray[k].exp == newExp) {
-                    result.termArray[k].coef += newCoef;
-                    found = true;
-                    break;
+```cpp
+virtual int NumberOfEdges() const {
+        return e;
+    }
+```
+
+### Degree
+
+```cpp
+virtual int Degree(int u) const {
+        if (!isValidVertex(u)) {
+            return 0;
+        }
+        return static_cast<int>(adj[u].size());
+    }
+```
+
+### ExistsEdge
+
+```cpp
+virtual bool ExistsEdge(int u, int v) const {
+        if (!isValidVertex(u) || !isValidVertex(v)) {
+            return false;
+        }
+        return find(adj[u].begin(), adj[u].end(), v) != adj[u].end();
+    }
+```
+
+### InsertVertex
+
+```cpp
+virtual void InsertVertex(int v) {
+        (void)v;
+        vector<int>* newAdj = new vector<int>[n + 1];
+        for (int i = 0; i < n; ++i) {
+            newAdj[i] = adj[i];
+        }
+        delete[] adj;
+        adj = newAdj;
+        ++n;
+    }
+```
+
+### InsertEdge
+
+```cpp
+virtual void InsertEdge(int u, int v) {
+        if (!isValidVertex(u) || !isValidVertex(v) || ExistsEdge(u, v)) {
+            return;
+        }
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+        ++e;
+    }
+```
+
+### DeleteVertex
+
+```cpp
+virtual void DeleteVertex(int v) {
+        if (!isValidVertex(v)) {
+            return;
+        }
+
+        vector<int>* newAdj = new vector<int>[n - 1];
+        for (int i = 0, newIndex = 0; i < n; ++i) {
+            if (i == v) {
+                continue;
+            }
+
+            for (int neighbor : adj[i]) {
+                if (neighbor == v) {
+                    continue;
+                }
+
+                if (neighbor > v) {
+                    newAdj[newIndex].push_back(neighbor - 1);
+                } else {
+                    newAdj[newIndex].push_back(neighbor);
                 }
             }
 
-            if (!found) {
-                result.termArray[result.terms].coef = newCoef;
-                result.termArray[result.terms].exp = newExp;
-                result.terms++;
-            }
+            ++newIndex;
         }
-    }
 
-    // 移除係數為0的項次
-    int validTerms = 0;
-    for (int i = 0; i < result.terms; ++i) {
-        if (result.termArray[i].coef != 0) {
-            result.termArray[validTerms++] = result.termArray[i];
+        delete[] adj;
+        adj = newAdj;
+        --n;
+
+        int edgeCount = 0;
+        for (int i = 0; i < n; ++i) {
+            edgeCount += static_cast<int>(adj[i].size());
         }
+        e = edgeCount / 2;
     }
-    result.terms = validTerms;
-
-    return result;
-}
 ```
 
-### operator' * '
+### DeleteEdge
 
 ```cpp
-Polynomial operator*(const Polynomial& b) const {
-        Polynomial result;
-        Node* pa = this->head->link;
-
-        while (pa != this->head) {
-            Polynomial tempPoly;
-            Node* temp = tempPoly.head;
-            Node* pb = b.head->link;
-
-            while (pb != b.head) {
-                Node* newNode = new Node();
-                newNode->coef = pa->coef * pb->coef;  // 係數相乘
-                newNode->exp = pa->exp + pb->exp;    // 指數相加
-                temp->link = newNode;
-                temp = temp->link;
-                pb = pb->link;
-            }
-
-            temp->link = tempPoly.head;  // 將最後一個節點鏈結到頭節點
-            result = result + tempPoly;
-            pa = pa->link;
+virtual void DeleteEdge(int u, int v) {
+        if (!isValidVertex(u) || !isValidVertex(v) || !ExistsEdge(u, v)) {
+            return;
         }
 
-        return result;
-}
+        bool removedFromU = removeNeighbor(u, v);
+        bool removedFromV = removeNeighbor(v, u);
+        if (removedFromU && removedFromV) {
+            --e;
+        }
+    }
 ```
 
+### showMartix
+
+```cpp
+void showMartix() {
+        for (int k = 0; k < n; k++) {
+            cout << k << " ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; j++) {
+                if (ExistsEdge(i, j)) {
+                    cout << "1 ";
+                } else {
+                    cout << "0 ";
+                }
+            }
+            cout << endl;
+        }
+    }
+```
+
+### showArraylist
+
+```cpp
+void showArraylist() {
+        vector<int>::iterator it;
+        for (int i = 0; i < n; ++i) {
+            cout << i << " : ";
+            for (it = adj[i].begin(); it != adj[i].end(); ++it)
+                cout << *it << " ";
+            cout << endl;
+        }
+    }
+```
 ## 3.效能分析
 
 ### 時間複雜度
