@@ -1,314 +1,161 @@
 # HW3 Graph Abstract
 
-## 1.解題說明
+## 1. 解題說明
 
-本程式主要是在實作一個圖形資料結構 Graph，並使用鄰接串列來儲存每個頂點之間的連結關係。
-程式提供了圖的基本操作，包含判斷圖是否為空、查詢頂點數與邊數、計算頂點度數、確認邊是否存在，以及新增和刪除頂點、邊等功能。
-另外也設計了兩種輸出方式，分別是鄰接串列與鄰接矩陣，方便觀察圖的結構是否正確。
+本程式實作一個無向圖資料結構 `Graph`，使用鄰接串列（vector 陣列）儲存每個頂點的鄰接清單。
+功能包含基本圖操作（新增邊）、圖的走訪（DFS、BFS）、圖分析（Connected Components、Biconnected Components）以及輸出輔助函式（列印鄰接串列）。
 
-這份程式的重點在於理解圖的基本操作與資料維護方式，尤其是無向圖在刪除頂點或刪除邊時，鄰接資料要如何同步更新，這是整個程式中最重要的部分。
+設計目標：
+- 練習圖的鄰接串列實作與動態記憶體管理
+- 實作 DFS 與 BFS 走訪
+- 利用 DFS 延伸實作 Connected Components（連通分量）
+- 使用 Tarjan-like 演算法找 Biconnected Components（雙連通分量，基於邊）
 
-### 基本操作
-```cpp 
-virtual ~Graph()
-virtual bool IsEmpty()
-virtual int NumberOfVertices()
-virtual int NumberOfEdges()
-virtual int Degree(int u)
-virtual bool ExistsEdge(int u, int v)
-virtual void InsertVertex(int v)
-virtual void InsertEdge(int u, int v)
-virtual void DeleteVertex(int v)
-virtual void DeleteEdge(int u, int v)
-```
+## 2. 程式設計與實作
 
-## 2.演算法設計與實作
+主要檔案：`GraphOperations.cpp`
+核心資料成員：
+- `n`：頂點數
+- `adj`：`vector<int>*`，長度為 `n`，每個元素為該頂點的鄰接清單
+- `visited`：走訪標記陣列
+- `dfn`, `low`, `timeCounter`, `stack<Edge>`：用於 Biconnected 演算法
 
-### IsEmpty
+主要方法摘要（與範例程式片段）
 
+- InsertEdge(u, v) — 新增無向邊（在 u 與 v 的鄰接清單各加入對方）
 ```cpp
-virtual bool IsEmpty() const {
-        return n == 0;
-    }
-```
-
-### NumberOfVertices
-
-```cpp
-virtual int NumberOfVertices() const {
-        return n;
-    }  
-```
-
-### NumberOfEdges
-
-```cpp
-virtual int NumberOfEdges() const {
-        return e;
-    }
-```
-
-### Degree
-
-```cpp
-virtual int Degree(int u) const {
-        if (!isValidVertex(u)) {
-            return 0;
-        }
-        return static_cast<int>(adj[u].size());
-    }
-```
-
-### ExistsEdge
-
-```cpp
-virtual bool ExistsEdge(int u, int v) const {
-        if (!isValidVertex(u) || !isValidVertex(v)) {
-            return false;
-        }
-        return find(adj[u].begin(), adj[u].end(), v) != adj[u].end();
-    }
-```
-
-### InsertVertex
-
-```cpp
-virtual void InsertVertex(int v) {
-        (void)v;
-        vector<int>* newAdj = new vector<int>[n + 1];
-        for (int i = 0; i < n; ++i) {
-            newAdj[i] = adj[i];
-        }
-        delete[] adj;
-        adj = newAdj;
-        ++n;
-    }
-```
-
-### InsertEdge
-
-```cpp
-virtual void InsertEdge(int u, int v) {
-        if (!isValidVertex(u) || !isValidVertex(v) || ExistsEdge(u, v)) {
-            return;
-        }
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-        ++e;
-    }
-```
-
-### DeleteVertex
-
-```cpp
-virtual void DeleteVertex(int v) {
-        if (!isValidVertex(v)) {
-            return;
-        }
-
-        vector<int>* newAdj = new vector<int>[n - 1];
-        for (int i = 0, newIndex = 0; i < n; ++i) {
-            if (i == v) {
-                continue;
-            }
-
-            for (int neighbor : adj[i]) {
-                if (neighbor == v) {
-                    continue;
-                }
-
-                if (neighbor > v) {
-                    newAdj[newIndex].push_back(neighbor - 1);
-                } else {
-                    newAdj[newIndex].push_back(neighbor);
-                }
-            }
-
-            ++newIndex;
-        }
-
-        delete[] adj;
-        adj = newAdj;
-        --n;
-
-        int edgeCount = 0;
-        for (int i = 0; i < n; ++i) {
-            edgeCount += static_cast<int>(adj[i].size());
-        }
-        e = edgeCount / 2;
-    }
-```
-
-### DeleteEdge
-
-```cpp
-virtual void DeleteEdge(int u, int v) {
-        if (!isValidVertex(u) || !isValidVertex(v) || !ExistsEdge(u, v)) {
-            return;
-        }
-
-        bool removedFromU = removeNeighbor(u, v);
-        bool removedFromV = removeNeighbor(v, u);
-        if (removedFromU && removedFromV) {
-            --e;
-        }
-    }
-```
-
-### showMartix
-
-```cpp
-void showMartix() {
-        for (int k = 0; k < n; k++) {
-            cout << k << " ";
-        }
-        cout << endl;
-        
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; j++) {
-                if (ExistsEdge(i, j)) {
-                    cout << "1 ";
-                } else {
-                    cout << "0 ";
-                }
-            }
-            cout << endl;
-        }
-    }
-```
-
-### showArraylist
-
-```cpp
-void showArraylist() {
-        vector<int>::iterator it;
-        for (int i = 0; i < n; ++i) {
-            cout << i << " : ";
-            for (it = adj[i].begin(); it != adj[i].end(); ++it)
-                cout << *it << " ";
-            cout << endl;
-        }
-    }
-```
-
-## 3.效能分析
-
-### 時間複雜度
-
-IsEmpty：O(1)
-
-NumberOfVertices：O(1)
-
-NumberOfEdges：O(1)
-
-Degree：O(1)
-
-ExistsEdge：O(deg(u))
-
-InsertVertex：O(n)
-
-InsertEdge：O(1)
-
-DeleteEdge：O(deg(u) + deg(v))
-
-DeleteVertex：O(n + e)
-
-showArraylist：O(n + e)
-
-showMartix：O(n²)
-
-### 空間複雜度
-
-鄰接串列整體空間：O(n + e)
-
-這種表示法比鄰接矩陣更省空間，特別適合邊數沒有很多的圖。
-
-## 4.測試
-
-### main()
-```cpp
-int main() {
-    Graph g(10);
-
-    g.InsertEdge(0, 1);
-    g.InsertEdge(1, 2);
-    g.InsertEdge(1, 3);
-    g.InsertEdge(2, 4);
-    g.InsertEdge(4, 3);
-    g.InsertEdge(3, 5);
-    g.InsertEdge(5, 6);
-    g.InsertEdge(5, 7);
-    g.InsertEdge(6, 7);
-    g.InsertEdge(7, 8);
-    g.InsertEdge(7, 9);
-
-    cout << "IsEmpty: " << g.IsEmpty() << endl;
-    cout << "NumberOfVertices: " << g.NumberOfVertices() << endl;
-    cout << "NumberOfEdges: " << g.NumberOfEdges() << endl;
-    cout << "Degree(7): " << g.Degree(7) << endl;
-    cout << "ExistsEdge(5, 7): " << g.ExistsEdge(5, 7) << endl;
-
-    g.showArraylist();
-    g.showMartix();
-
-    g.DeleteEdge(5, 7);
-    g.DeleteVertex(9);
-
-    cout << endl << "After DeleteEdge(5, 7) and DeleteVertex(9)" << endl;
-    cout << "NumberOfVertices: " << g.NumberOfVertices() << endl;
-    cout << "NumberOfEdges: " << g.NumberOfEdges() << endl;
-    g.showArraylist();
-
-    return 0;
+void InsertEdge(int u, int v) {
+    if (!isValidVertex(u) || !isValidVertex(v)) return;
+    adj[u].push_back(v);
+    adj[v].push_back(u);
 }
 ```
 
-### 輸出
-```
-IsEmpty: 0
-NumberOfVertices: 10
-NumberOfEdges: 11
-Degree(7): 4
-ExistsEdge(5, 7): 1
-0 : 1 
-1 : 0 2 3 
-2 : 1 4 
-3 : 1 4 5 
-4 : 2 3 
-5 : 3 6 7 
-6 : 5 7 
-7 : 5 6 8 9 
-8 : 7 
-9 : 7 
-0 1 2 3 4 5 6 7 8 9 
-0 1 0 0 0 0 0 0 0 0 
-1 0 1 1 0 0 0 0 0 0 
-0 1 0 0 1 0 0 0 0 0 
-0 1 0 0 1 1 0 0 0 0 
-0 0 1 1 0 0 0 0 0 0 
-0 0 0 1 0 0 1 1 0 0 
-0 0 0 0 0 1 0 1 0 0 
-0 0 0 0 0 1 1 0 1 1 
-0 0 0 0 0 0 0 1 0 0 
-0 0 0 0 0 0 0 1 0 0 
-
-After DeleteEdge(5, 7) and DeleteVertex(9)
-NumberOfVertices: 9
-NumberOfEdges: 9
-0 : 1 
-1 : 0 2 3 
-2 : 1 4 
-3 : 1 4 5 
-4 : 2 3 
-5 : 3 6 
-6 : 5 7 
-7 : 6 8 
-8 : 7
+- DFS (遞迴) — 深度優先走訪（Driver: 會先把 visited 清為 false 再從指定頂點遞迴）
+```cpp
+void DFS(int v) {
+    visited[v] = true;
+    cout << v << ' ';
+    for (int w : adj[v]) if (!visited[w]) DFS(w);
+}
 ```
 
-## 5.心得討論
+- BFS — 廣度優先走訪（使用 queue）
+```cpp
+void BFS(int v) {
+    fill visited false; queue<int> q;
+    visited[v]=true; q.push(v);
+    while(!q.empty()){
+      int cur=q.front(); q.pop(); cout<<cur<<' ';
+      for(int w: adj[cur]) if(!visited[w]){ visited[w]=true; q.push(w); }
+    }
+}
+```
 
-這次的圖形資料結構實作，讓我更熟悉鄰接串列的概念與無向圖的操作方式。
-和單純只做新增邊相比，刪除頂點的處理更複雜，因為除了要移除相關邊之外，還要重新整理頂點編號，這部分讓我更理解資料結構維護時的細節。
-透過這次練習，我也更清楚圖形結構中不同操作的成本差異。
-例如查詢度數很快，但刪除頂點與輸出矩陣則需要較多時間。
+- ConnectedComponents — 使用多次 DFS 找所有連通分量
+```cpp
+void ConnectedComponents() {
+    fill visited false;
+    for (i=0..n-1) if(!visited[i]) {
+        vector<int> comp; DFSCollect(i, comp);
+        // 輸出 comp
+    }
+}
+```
+
+- Biconnected（邊為單位的雙連通分量） — Tarjan-like，使用 `dfn`/`low` 與邊堆疊
+核心遞迴函式 BiconnectedRec：
+```cpp
+void BiconnectedRec(int u, int parent) {
+    dfn[u] = low[u] = ++timeCounter;
+    for (int w : adj[u]) {
+        if (w == parent) continue;
+        if (dfn[w] == 0) {
+            s.push({u,w});
+            BiconnectedRec(w,u);
+            low[u] = min(low[u], low[w]);
+            if (low[w] >= dfn[u]) {
+                // pop edges until (u,w), 輸出為一個 biconnected component (edge-based)
+            }
+        } else if (dfn[w] < dfn[u]) {
+            s.push({u,w});
+            low[u] = min(low[u], dfn[w]);
+        }
+    }
+}
+```
+
+程式中已提供 `Biconnected()` driver，會針對每個未編號的節點呼叫 `BiconnectedRec` 並輸出所有邊型分量。
+
+## 3. 效能分析
+
+時間複雜度（以 n 頂點、e 邊計）：
+- InsertEdge：O(1)
+- DFS（整圖）：O(n + e)
+- BFS（整圖）：O(n + e)
+- ConnectedComponents：O(n + e)
+- Biconnected（Tarjan）：O(n + e)
+- 輸出鄰接串列：O(n + e)
+- 輸出鄰接矩陣（若實作）：O(n^2)
+
+空間複雜度：
+- 鄰接串列：O(n + e)
+- 額外：`visited`、`dfn`、`low` 等為 O(n)，stack 為 O(e) worst-case。
+
+## 4. 測試（main 範例）
+
+程式 `main()` 會建立一個 12 頂點的圖並插入幾條邊（包含一個獨立小分量 10-11），然後依序輸出：
+
+- 鄰接串列（Adjacency List）
+- DFS（從 0 與從 2）
+- BFS（從 0 與從 2）
+- Connected Components（節點集合）
+- Biconnected Components（以邊列出，程式目前輸出邊對）
+
+程式執行範例輸出（節錄）：
+```
+Adjacency List:
+0 : 1 2
+1 : 0 3 4
+...
+DFS starting from vertex 0:
+0 1 3 7 4 8 2 5 6 9
+BFS starting from vertex 0:
+0 1 2 3 4 5 6 7 8 9
+Connected Components:
+Component 1: 0 1 3 7 4 8 2 5 6 9
+Component 2: 10 11
+Biconnected Components (edge-based):
+New Biconnected Component:
+3 7
+New Biconnected Component:
+1 3
+...
+```
+
+## 5. 使用說明（快速上手）
+
+編譯：
+```bash
+g++ -g GraphOperations.cpp -o GraphOperations.exe
+```
+
+執行：
+```bash
+./GraphOperations.exe
+```
+
+要把 `Graph` 拆成可重用的模組（供其他測試程式、產生器呼叫），建議把類別宣告/實作拆成 `Graph.h` / `Graph.cpp`，再寫一個 `tester.cpp` 或 `generator.cpp` 負責讀寫檔案與批次測試。
+
+## 6. 心得與擴充建議
+
+- 本次實作讓我熟悉鄰接串列表示法，以及 DFS/BFS 在圖上的典型用途。
+- Connected Components 與 Biconnected（基於 Tarjan）是圖論中常見的分析工具，實務上常用於網路連通性、橋（bridge）與 articulation point（割點）等偵測。
+- 建議擴充：
+  - Biconnected 改為輸出節點集合（目前輸出邊對，可由邊集合轉換為節點集合）；
+  - 增加 `CountComponents()`、`CountBiconnected()` 等回傳數值函式，便於自動化測試；
+  - 將 `Graph` 拆成 `Graph.h` / `Graph.cpp`，並增加單元測試檔案與輸入/輸出規格。
+
+---
+
+如果你要，我可以把本檔寫入其他檔名或幫你把 Biconnected 輸出改成節點集合，或進一步拆模組。
