@@ -4,7 +4,7 @@
 本程式實作一個無向圖資料結構 `Graph`，使用鄰接串列（vector 陣列）儲存每個頂點的鄰接清單。
 功能包含基本圖操作（新增邊）、圖的走訪（DFS、BFS）、圖分析（Connected Components、Biconnected Components）以及輸出輔助函式（列印鄰接串列）。
 
-設計目標：
+### 設計目標：
 - 練習圖的鄰接串列實作與動態記憶體管理
 - 實作 DFS 與 BFS 走訪
 - 利用 DFS 延伸實作 Connected Components（連通分量）
@@ -12,14 +12,14 @@
 
 ## 2. 程式設計與實作
 
-主要檔案：`GraphOperations.cpp`
+### 主要檔案：`GraphOperations.cpp`
 核心資料成員：
 - `n`：頂點數
 - `adj`：`vector<int>*`，長度為 `n`，每個元素為該頂點的鄰接清單
 - `visited`：走訪標記陣列
 - `dfn`, `low`, `timeCounter`, `stack<Edge>`：用於 Biconnected 演算法
 
-主要方法摘要（與範例程式片段）
+### 主要方法摘要（與範例程式片段）
 
 - InsertEdge(u, v) — 新增無向邊（在 u 與 v 的鄰接清單各加入對方）
 ```cpp
