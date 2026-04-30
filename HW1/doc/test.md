@@ -84,7 +84,6 @@ void BiconnectedRec(int u, int parent) {
 }
 ```
 
-程式中已提供 `Biconnected()` driver，會針對每個未編號的節點呼叫 `BiconnectedRec` 並輸出所有邊型分量。
 
 ## 3. 效能分析
 
