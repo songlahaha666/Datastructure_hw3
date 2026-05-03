@@ -136,3 +136,9 @@ New Biconnected Component:
 本次實作讓我熟悉鄰接串列表示法，以及 DFS/BFS 在圖上的典型用途。
 並且更加了解Connected Components以及Biconnected Components之間的實作差異，透過先前的GraphAbstract又延伸出了各種Graph操作，
 把這些結合起來成就了一個基本的程式框架。
+
+```shell
+$ g++ main.c --std=c++21 -o main.exe
+$ .\main.exe
+hello world!
+```
