@@ -1,6 +1,6 @@
 # 41143138
 # 41143111 
-
+- `result/average_case_result.csv`
 
 ## 專案介紹
 本專案為資料結構 Homework 2 作業，使用 C++ 實作 Graph（圖形）相關資料結構與演算法。
